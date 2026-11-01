@@ -9,7 +9,7 @@
 A live 3D cup, steam you can push around with your cursor, and a scroll journey that follows one coffee bean from the farm all the way into your cup.
 
 [![Live demo](https://img.shields.io/badge/live_demo-GitHub_Pages-c08a4e?style=for-the-badge)](https://iamruqia.github.io/velluto-coffee/)
-[![Three.js](https://img.shields.io/badge/three.js-r158-000000?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org)
+[![Three.js](https://img.shields.io/badge/Three.js-r158-000000?style=for-the-badge&logo=threedotjs&logoColor=white)](https://threejs.org)
 [![GSAP](https://img.shields.io/badge/GSAP-ScrollTrigger-0ae448?style=for-the-badge&logo=greensock&logoColor=white)](https://gsap.com)
 [![No build step](https://img.shields.io/badge/build_step-none-1b100b?style=for-the-badge)](#-run-it-locally)
 [![License: MIT](https://img.shields.io/badge/license-MIT-8a4f26?style=for-the-badge)](LICENSE)
