@@ -1,7 +1,7 @@
 /*!
  * Velluto · interface
  * GSAP + ScrollTrigger for choreography, Lenis for smooth scroll, the 3D scene
- * from scene.js. Every feature degrades: no GSAP → content is static and visible,
+ * from scene.js, and a melody you play by scrolling (Web Audio API). Every feature degrades: no GSAP → content is static and visible,
  * no WebGL → photographic fallbacks, reduced motion → no smoothing or parallax.
  */
 (function () {
@@ -101,51 +101,212 @@
   }
 
   /* ------------------------------------------------------------------
-   * sound: an optional porcelain "tink", synthesised, off by default
+   * music: a calm café melody that you play by scrolling, off by default
+   *
+   * Everything is synthesised live with the Web Audio API, no audio files:
+   *  - a soft chord pad and a round bass note; every section of the page has
+   *    its own chord (D major 9 → B minor 9 → G major 9 → E minor 9 → A → D),
+   *  - a music-box / electric-piano voice: each step of scrolling plays the next
+   *    note of a written melody, scrolling back plays it in reverse, and faster
+   *    scrolling plays a little louder,
+   *  - a warm room reverb and a soft echo tie it all together.
+   * When nothing moves the pad settles down quietly; hidden tabs are silent.
    * ------------------------------------------------------------------ */
-  var Sound = {
-    on: false, ctx: null, last: 0,
-    context: function () {
-      if (!this.ctx) { var AC = win.AudioContext || win.webkitAudioContext; if (!AC) return null; this.ctx = new AC(); }
-      if (this.ctx.state === 'suspended') this.ctx.resume();
-      return this.ctx;
-    },
-    tink: function (pitch, gain, force) {
-      if (!this.on && !force) return;
-      var now = performance.now();
-      if (!force && now - this.last < 80) return;
-      this.last = now;
-      var ctx = this.context(); if (!ctx) return;
-      if (ctx.state !== 'running') {
-        if (force) { var self = this; ctx.resume().then(function () { self.play(ctx, pitch, gain); }, function () {}); }
-        return;
-      }
-      this.play(ctx, pitch, gain);
-    },
-    play: function (ctx, pitch, gain) {
-      var t = ctx.currentTime, base = 1760 * (pitch || 1) * (1 + (Math.random() - 0.5) * 0.02);
-      var out = ctx.createGain();
-      out.gain.setValueAtTime(0.0001, t);
-      out.gain.exponentialRampToValueAtTime(gain || 0.035, t + 0.004);
-      out.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
-      var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 700;
-      out.connect(hp); hp.connect(ctx.destination);
-      [[1, 1], [2.76, 0.42], [5.4, 0.16]].forEach(function (p) {
-        var o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = 'sine'; o.frequency.value = base * p[0]; g.gain.value = p[1];
-        o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.55);
-      });
-    },
-    set: function (v, silent) {
-      this.on = v;
-      $$('[data-sound]').forEach(function (b) { b.setAttribute('aria-pressed', v ? 'true' : 'false'); });
-      store('velluto-sound', v ? '1' : '0');
-      if (v && !silent) this.tink(1.15, 0.05, true);
-      if (!silent) toast(v ? 'Hover sounds on' : 'Hover sounds off');
+  var Sound = (function () {
+    function hz(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+    // section → chord: pad notes and a bass note (MIDI numbers)
+    var CHORDS = {
+      top:       { pad: [50, 57, 61, 64, 66], bass: 38 }, // Dmaj9
+      menu:      { pad: [54, 57, 61, 62, 66], bass: 47 }, // Bm9
+      beans:     { pad: [55, 59, 62, 66, 69], bass: 43 }, // Gmaj9
+      story:     { pad: [52, 55, 59, 62, 66], bass: 40 }, // Em9
+      specialty: { pad: [57, 61, 64, 66, 69], bass: 45 }, // A6/9
+      visit:     { pad: [54, 57, 61, 62, 69], bass: 38 }  // Dmaj7
+    };
+    // the melody, written in D major pentatonic (D E F# A B), so every note sits well on every chord
+    var SCALE = [62, 64, 66, 69, 71, 74, 76, 78, 81];
+    var TUNE = [3, 4, 5, 4, 3, 2, 3, 1,   2, 3, 5, 6, 5, 3, 4, 2,
+                5, 6, 7, 6, 5, 4, 5, 3,   4, 3, 2, 1, 2, 3, 1, 0,
+                3, 5, 4, 3, 5, 6, 8, 7,   6, 5, 4, 5, 3, 2, 1, 0];
+
+    var S = { on: false, ctx: null, last: 0, step: 0, chordKey: '', pad: null, activity: 0, idleTimer: 0 };
+    var master, bus, wet, delay;
+
+    function build(ctx) {
+      master = ctx.createGain(); master.gain.value = 0;
+      var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3;
+      master.connect(comp); comp.connect(ctx.destination);
+      bus = ctx.createGain(); bus.connect(master);
+      // room reverb from a generated impulse
+      var len = Math.floor(ctx.sampleRate * 2.6), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (var c = 0; c < 2; c++) { var d = ir.getChannelData(c); for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+      var verb = ctx.createConvolver(); verb.buffer = ir;
+      wet = ctx.createGain(); wet.gain.value = 0.32; wet.connect(verb); verb.connect(master);
+      // a soft dotted echo, darkened so it never gets busy
+      delay = ctx.createDelay(1.5); delay.delayTime.value = 0.42;
+      var fb = ctx.createGain(); fb.gain.value = 0.26;
+      var tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 1800;
+      var dOut = ctx.createGain(); dOut.gain.value = 0.22;
+      delay.connect(tone); tone.connect(fb); fb.connect(delay); tone.connect(dOut); dOut.connect(master); dOut.connect(wet);
+      bus.connect(wet);
     }
-  };
+
+    function context() {
+      if (!S.ctx) {
+        var AC = win.AudioContext || win.webkitAudioContext; if (!AC) return null;
+        try { S.ctx = new AC(); build(S.ctx); } catch (e) { S.ctx = null; return null; }
+      }
+      if (S.ctx.state === 'suspended' && S.on && !doc.hidden) S.ctx.resume();
+      return S.ctx;
+    }
+
+    // the chord pad: detuned soft triangles under a low-pass, plus a round sine bass
+    function padFor(key) {
+      var ctx = S.ctx, ch = CHORDS[key] || CHORDS.top, t = ctx.currentTime;
+      var g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t);
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900; lp.Q.value = 0.4;
+      lp.connect(g); g.connect(bus);
+      var oscs = [];
+      ch.pad.forEach(function (m, i) {
+        [-7, 7].forEach(function (cents) {
+          var o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = hz(m); o.detune.value = cents + (i - 2) * 1.5;
+          var v = ctx.createGain(); v.gain.value = 0.016 / ch.pad.length;
+          o.connect(v); v.connect(lp); o.start(t); oscs.push(o);
+        });
+      });
+      var bass = ctx.createOscillator(); bass.type = 'sine'; bass.frequency.value = hz(ch.bass);
+      var bg = ctx.createGain(); bg.gain.value = 0.022; bass.connect(bg); bg.connect(g); bass.start(t); oscs.push(bass);
+      // a slow swell keeps the pad breathing
+      var lfo = ctx.createOscillator(), lfoG = ctx.createGain(); lfo.frequency.value = 0.07; lfoG.gain.value = 260;
+      lfo.connect(lfoG); lfoG.connect(lp.frequency); lfo.start(t); oscs.push(lfo);
+      return { gain: g, oscs: oscs };
+    }
+    function setChord(key) {
+      if (!S.ctx || key === S.chordKey || !CHORDS[key]) return;
+      S.chordKey = key;
+      var t = S.ctx.currentTime, old = S.pad;
+      S.pad = padFor(key);
+      S.pad.gain.gain.setTargetAtTime(padLevel(), t, 0.7);
+      if (old) {
+        old.gain.gain.cancelScheduledValues(t);
+        old.gain.gain.setTargetAtTime(0.0001, t, 0.6);
+        old.oscs.forEach(function (o) { try { o.stop(t + 4); } catch (e) { /* already stopped */ } });
+      }
+    }
+    function padLevel() { return 0.45 + 0.55 * S.activity; }
+    function setActivity(v) {
+      S.activity = v;
+      if (S.pad && S.ctx) S.pad.gain.gain.setTargetAtTime(padLevel(), S.ctx.currentTime, v > 0.5 ? 0.25 : 1.6);
+    }
+
+    // a music-box / electric-piano note
+    function note(midi, vel, pan) {
+      var ctx = S.ctx; if (!ctx || ctx.state !== 'running') return;
+      var t = ctx.currentTime, f = hz(midi), out = ctx.createGain();
+      out.gain.setValueAtTime(0.0001, t);
+      out.gain.exponentialRampToValueAtTime(vel, t + 0.008);
+      out.gain.exponentialRampToValueAtTime(vel * 0.35, t + 0.35);
+      out.gain.exponentialRampToValueAtTime(0.0001, t + 2.2);
+      var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3600;
+      out.connect(lp);
+      var node = lp;
+      if (ctx.createStereoPanner) { var pn = ctx.createStereoPanner(); pn.pan.value = pan || 0; lp.connect(pn); node = pn; }
+      node.connect(bus); node.connect(delay);
+      [[1, 1, 2.2], [2, 0.22, 0.9], [3.01, 0.07, 0.35], [0.5, 0.12, 1.6]].forEach(function (h) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine'; o.frequency.value = f * h[0];
+        g.gain.setValueAtTime(h[1], t); g.gain.exponentialRampToValueAtTime(0.0001, t + h[2]);
+        o.connect(g); g.connect(out); o.start(t); o.stop(t + h[2] + 0.05);
+      });
+    }
+
+    // which section sits in the middle of the screen
+    var sections = $$('[data-section]');
+    function currentSection() {
+      var mid = win.innerHeight / 2, key = 'top';
+      for (var i = 0; i < sections.length; i++) {
+        var r = sections[i].getBoundingClientRect();
+        if (r.top <= mid && r.bottom > mid) { key = sections[i].getAttribute('data-section'); break; }
+      }
+      return key;
+    }
+
+    // scroll → notes: every step of distance plays the next note of the tune
+    var lastY = win.scrollY || 0, travel = 0, lastStep = 0;
+    function onScroll() {
+      var y = win.scrollY || 0, dy = y - lastY; lastY = y;
+      if (!S.on || !S.ctx || S.ctx.state !== 'running') return;
+      setChord(currentSection());
+      travel += dy;
+      var stepPx = Math.max(70, win.innerHeight * 0.11), now = performance.now();
+      if (Math.abs(travel) < stepPx || now - lastStep < 120) return;
+      var speed = Math.min(1, Math.abs(travel) / (stepPx * 3));
+      var dir = travel > 0 ? 1 : -1;
+      travel = 0; lastStep = now;
+      S.step = (S.step + dir + TUNE.length) % TUNE.length;
+      var midi = SCALE[TUNE[S.step]];
+      note(midi, 0.12 + 0.08 * speed, ((S.step % 8) / 7 - 0.5) * 0.5);
+      if (S.step % 8 === 0) note(midi - 12, 0.05, 0); // a soft low echo at the start of each phrase
+      setActivity(1);
+      clearTimeout(S.idleTimer);
+      S.idleTimer = setTimeout(function () { setActivity(0); }, 2600);
+    }
+    win.addEventListener('scroll', onScroll, { passive: true });
+
+    doc.addEventListener('visibilitychange', function () {
+      if (!S.ctx) return;
+      if (doc.hidden) S.ctx.suspend(); else if (S.on) S.ctx.resume();
+    });
+
+    return {
+      get on() { return S.on; },
+      context: context,
+      // small interface accents (hover, choosing a size, opening a drink):
+      // a quiet high note taken from the chord that is playing
+      tink: function (pitch, gain) {
+        if (!S.on) return;
+        var now = performance.now(); if (now - S.last < 90) return; S.last = now;
+        if (!context() || S.ctx.state !== 'running') return;
+        var ch = CHORDS[S.chordKey] || CHORDS.top;
+        var idx = Math.min(ch.pad.length - 1, Math.max(0, Math.round(((pitch || 1) - 0.8) * 8)));
+        note(ch.pad[idx] + 24, (gain || 0.03) * 1.4, (Math.random() - 0.5) * 0.4);
+      },
+      set: function (v, silent) {
+        S.on = v;
+        $$('[data-sound]').forEach(function (b) { b.setAttribute('aria-pressed', v ? 'true' : 'false'); });
+        store('velluto-sound', v ? '1' : '0');
+        var ctx = context();
+        if (ctx) {
+          var t = ctx.currentTime;
+          master.gain.cancelScheduledValues(t);
+          if (v) {
+            var start = function () {
+              S.chordKey = ''; setChord(currentSection()); setActivity(0.6);
+              master.gain.setTargetAtTime(0.9, ctx.currentTime, 0.5);
+              // a short welcome phrase so you know it's on
+              if (!silent) [0, 1, 2].forEach(function (k) { setTimeout(function () { note(SCALE[[3, 5, 7][k]], 0.1, (k - 1) * 0.3); }, k * 180); });
+            };
+            if (ctx.state === 'running') start(); else ctx.resume().then(start, function () {});
+          } else {
+            master.gain.setTargetAtTime(0, t, 0.3);
+            setTimeout(function () { if (!S.on && S.ctx) S.ctx.suspend(); }, 1500);
+          }
+        }
+        if (!silent) toast(v ? 'Music on · scroll to play the melody' : 'Music off');
+      }
+    };
+  })();
   $$('[data-sound]').forEach(function (b) { b.addEventListener('click', function () { Sound.set(!Sound.on); }); });
-  if (store('velluto-sound') === '1') Sound.set(true, true);
+  // Browsers only allow sound after a tap or click, so a remembered "on" starts on the first interaction.
+  if (store('velluto-sound') === '1') {
+    var resumeMusic = function (e) {
+      if (e && e.target && e.target.closest && e.target.closest('[data-sound]')) return; // the button handles itself
+      doc.removeEventListener('pointerdown', resumeMusic); doc.removeEventListener('keydown', resumeMusic);
+      if (!Sound.on) Sound.set(true, true);
+    };
+    $$('[data-sound]').forEach(function (b) { b.setAttribute('aria-pressed', 'true'); });
+    doc.addEventListener('pointerdown', resumeMusic); doc.addEventListener('keydown', resumeMusic);
+  }
 
   var toastEl = $('#toast'), toastTimer = 0;
   function toast(msg) {

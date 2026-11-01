@@ -81,7 +81,7 @@ The site is plain **HTML, CSS and JavaScript**, with no framework and no build s
 There is no 3D model file. Everything in [`js/scene.js`](js/scene.js) is generated when the page loads:
 
 - **The porcelain cup and saucer** are "turned on a lathe": a 2D side profile is spun around an axis (`LatheGeometry`), just like a real potter's wheel. They get a gold rim and glossy glaze.
-- **The latte art** is a custom GPU shader (`ShaderMaterial`) that draws an animated heart in the coffee's surface, with crema that slowly swirls.
+- **The latte art** is a real rosetta, photographed from above and unwrapped into a round texture ([`img/latte-art.webp`](img/latte-art.webp)). A GPU shader brings it to life: the milk breathes with slow ripples, drifts very gently, and swirls into the coffee as the cup moves with your scroll. The foam is matte and the crema glossy, just like the real thing.
 - **The steam** is another shader, driven by a noise texture generated in code. It drifts with the cursor: the faster you move the mouse, the stronger the "wind".
 - **Every coffee bean** is an ellipsoid with a flat face and an S-shaped crease. Hundreds of them are drawn in a single pass with `InstancedMesh`, so they stay fast.
 - **The lighting** is a soft studio environment baked once at start-up (PMREM), with filmic tone mapping (ACES) and soft shadows. The light changes along the journey, from cool daylight at the farm to the roaster's flame to a warm café glow.
@@ -116,9 +116,19 @@ Every feature degrades gracefully:
 - **Structured data:** the café, its menu, prices and opening hours are described with [schema.org](https://schema.org) `CafeOrCoffeeShop` markup, so search engines can show them directly.
 - **Open Graph tags** make links look good when shared.
 
+### 🎵 A melody you play by scrolling
+
+Turn on **Music** in the top bar and the page becomes an instrument:
+
+- **Every step of scrolling plays the next note** of a written café melody on a soft music-box / electric-piano voice. Scroll faster and it plays a little louder; scroll back up and the melody plays in reverse.
+- **Each section has its own chord.** A warm pad and a round bass glide from D major 9 in the hero, through B minor 9 at the menu, G major 9 on the bean journey, E minor 9 in the story and A in the signature pours, back home to D at the finale.
+- The melody is written in the D major pentatonic scale, so every note sits beautifully on every chord, whatever speed you scroll at.
+- A warm room reverb and a soft echo tie it together. When you stop, the pad settles down quietly, and a hidden tab goes silent.
+- Hovering and choosing a drink size play quiet notes from the chord that's playing, so the interface stays in tune with the music.
+- It's all synthesized live with the **Web Audio API**, with no audio files. It's off by default, and the choice is remembered.
+
 ### 🔊 Little details
 
-- An optional porcelain *tink* on hover, synthesized live with the Web Audio API. It's off by default, and the choice is remembered.
 - One-click **copy buttons** for the phone number and email.
 - A **newsletter form** with validation and a friendly confirmation message.
 

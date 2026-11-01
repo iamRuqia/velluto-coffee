@@ -1,7 +1,7 @@
 /*!
  * Velluto · live 3D scene
  * Three.js r158 (UMD global THREE). Everything is procedural: porcelain cup and
- * saucer turned on a lathe, latte-art liquid shader, noise-driven steam, instanced
+ * saucer turned on a lathe, a photographed rosetta brought to life by a shader, noise-driven steam, instanced
  * coffee beans, dust and bokeh particles, plus the scroll-driven bean journey.
  *
  * Public API (window.VellutoScene):
@@ -167,48 +167,46 @@
   }
 
   /* ---------- shaders ---------- */
+  // The latte art is a real rosetta, photographed from above and unwrapped into a
+  // round texture (img/latte-art.webp). The shader keeps it alive: the milk breathes
+  // with slow ripples, drifts very gently, and swirls when the cup moves with the scroll.
+  // Until the texture arrives (or if it fails), a plain crema surface is shown.
   var LATTE_GLSL = [
     'uniform float uTime;',
     'uniform float uSwirl;',
+    'uniform sampler2D uArt;',
+    'uniform float uArtMix;',
     'vec4 LATTE;',
     'float lh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }',
     'float ln(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);',
     '  return mix(mix(lh(i), lh(i + vec2(1.0, 0.0)), u.x), mix(lh(i + vec2(0.0, 1.0)), lh(i + vec2(1.0, 1.0)), u.x), u.y); }',
     'float lfbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * ln(p); p *= 2.03; a *= 0.5; } return v; }',
-    'float ldot2(vec2 v){ return dot(v, v); }',
-    'float sdHeart(vec2 p){ p.x = abs(p.x);',
-    '  if (p.y + p.x > 1.0) return sqrt(ldot2(p - vec2(0.25, 0.75))) - 0.35355;',
-    '  return sqrt(min(ldot2(p - vec2(0.0, 1.0)), ldot2(p - 0.5 * max(p.x + p.y, 0.0)))) * sign(p.x - p.y); }',
     'vec3 lin(vec3 c){ return pow(c, vec3(2.2)); }',
     'vec4 latte(vec2 uv){',
     '  vec2 p = uv * 2.0 - 1.0;',
     '  float r = length(p);',
-    '  float ang = uTime * 0.035 + uSwirl * (1.0 - r);',
+    // swirl: a calm base turn plus extra twist from scrolling (stronger near the centre)
+    '  float twist = max(uSwirl - 0.35, 0.0) * (1.0 - r) * (1.0 - r);',
+    '  float ang = sin(uTime * 0.11) * 0.035 + twist;',
     '  float s = sin(ang), c = cos(ang);',
-    '  p = mat2(c, -s, s, c) * p;',
-    '  vec2 w = vec2(lfbm(p * 2.6 + uTime * 0.03), lfbm(p * 2.6 + 7.3 - uTime * 0.025)) - 0.5;',
-    '  vec2 q = p + w * 0.07;',
-    '  float n = lfbm(q * 6.0);',
-    '  vec3 crema = mix(lin(vec3(0.55, 0.31, 0.14)), lin(vec3(0.74, 0.47, 0.24)), smoothstep(0.32, 0.78, n));',
-    '  crema = mix(crema, lin(vec3(0.27, 0.13, 0.05)), smoothstep(0.6, 1.0, r));',
-    '  crema *= 0.86 + 0.26 * lfbm(q * 22.0);',
-    '  vec2 hp = q * 1.08 + vec2(0.0, 0.56);',
-    '  float d = sdHeart(hp);',
-    '  float foam = 1.0 - smoothstep(-0.012, 0.02, d);',
-    '  float rings = 0.0;',
-    '  for (int i = 1; i <= 3; i++) { float fi = float(i); float k = 1.0 + fi * 0.34;',
-    '    float d2 = sdHeart((hp - vec2(0.0, 0.06 * fi)) * k) / k;',
-    '    rings += (1.0 - smoothstep(0.004, 0.02, abs(d2))) * (0.75 - 0.12 * fi); }',
-    '  float line = (1.0 - smoothstep(0.006, 0.022, abs(hp.x + 0.02 * sin(hp.y * 7.0)))) * smoothstep(-0.05, 0.12, hp.y) * (1.0 - smoothstep(0.55, 0.85, hp.y));',
-    '  vec3 milk = lin(vec3(0.97, 0.93, 0.86)) * (0.96 + 0.06 * lfbm(q * 40.0));',
-    '  vec3 milkEdge = lin(vec3(0.86, 0.71, 0.53));',
-    '  vec3 foamCol = mix(milk, milkEdge, smoothstep(-0.14, 0.0, d) * 0.55);',
-    '  foamCol = mix(foamCol, crema * 1.15, clamp(rings, 0.0, 1.0) * 0.8);',
-    '  foamCol = mix(foamCol, crema, line * 0.7);',
-    '  vec3 col = mix(crema, foamCol, foam);',
-    '  float halo = smoothstep(0.83, 0.93, r) * (1.0 - smoothstep(0.93, 1.0, r));',
-    '  col = mix(col, milk * 0.85, halo * 0.55);',
-    '  return vec4(col, clamp(foam + halo * 0.5, 0.0, 1.0));',
+    '  vec2 q = mat2(c, -s, s, c) * p;',
+    // the milk breathes: soft concentric ripples and a slow noise drift
+    '  q *= 1.0 + 0.006 * sin(r * 26.0 - uTime * 1.4) * (1.0 - r);',
+    '  vec2 w = vec2(lfbm(q * 3.0 + uTime * 0.04), lfbm(q * 3.0 + 9.1 - uTime * 0.035)) - 0.5;',
+    '  q += w * 0.012;',
+    // crema base, also the fallback before the texture loads
+    '  float n = lfbm(q * 6.0 + uTime * 0.02);',
+    '  vec3 crema = mix(lin(vec3(0.5, 0.27, 0.11)), lin(vec3(0.7, 0.43, 0.2)), smoothstep(0.3, 0.8, n));',
+    '  crema = mix(crema, lin(vec3(0.26, 0.12, 0.05)), smoothstep(0.7, 1.0, r));',
+    // the photographed rosetta
+    '  vec3 art = lin(texture2D(uArt, q * 0.47 + 0.5).rgb);',
+    '  art *= 0.97 + 0.06 * lfbm(q * 48.0 + uTime * 0.15);',
+    '  float edge = smoothstep(0.84, 0.99, r);',
+    '  art = mix(art, crema, edge);',
+    '  vec3 col = mix(crema, art, uArtMix);',
+    // milk foam is matte, crema is glossy: use brightness as the foam amount
+    '  float foam = smoothstep(0.25, 0.7, dot(col, vec3(0.3, 0.55, 0.15))) * uArtMix * (1.0 - edge);',
+    '  return vec4(col, foam);',
     '}'
   ].join('\n');
 
@@ -373,18 +371,34 @@
     /* materials */
     var porcelain = new THREE.MeshPhysicalMaterial({ color: 0xf2e9dc, roughness: 0.2, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.07, envMapIntensity: 1.0 });
     var gold = new THREE.MeshStandardMaterial({ color: 0xe2bf7a, metalness: 1, roughness: 0.2, envMapIntensity: 1.3 });
-    var liquidUniforms = { uTime: { value: 0 }, uSwirl: { value: 0.35 } };
+    var liquidUniforms = { uTime: { value: 0 }, uSwirl: { value: 0.35 }, uArt: { value: null }, uArtMix: { value: 0 } };
+    liquidUniforms.uArt.value = new THREE.DataTexture(new Uint8Array([140, 82, 40, 255]), 1, 1);
+    liquidUniforms.uArt.value.needsUpdate = true;
+    new THREE.TextureLoader().load('img/latte-art.webp', function (tex) {
+      tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+      liquidUniforms.uArt.value = tex;
+      var t0 = performance.now();
+      (function fadeIn() {
+        var k = Math.min(1, (performance.now() - t0) / 900);
+        liquidUniforms.uArtMix.value = reduced ? 1 : k * k * (3 - 2 * k);
+        st.needsRender = true;
+        if (k < 1 && !reduced) requestAnimationFrame(fadeIn);
+      })();
+    });
     var liquidMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.18, envMapIntensity: 0.7 });
     liquidMat.defines = { USE_UV: '' };
     liquidMat.onBeforeCompile = function (shader) {
       shader.uniforms.uTime = liquidUniforms.uTime;
       shader.uniforms.uSwirl = liquidUniforms.uSwirl;
+      shader.uniforms.uArt = liquidUniforms.uArt;
+      shader.uniforms.uArtMix = liquidUniforms.uArtMix;
       shader.fragmentShader = shader.fragmentShader
         .replace('#include <common>', '#include <common>\n' + LATTE_GLSL)
         .replace('#include <map_fragment>', '#include <map_fragment>\nLATTE = latte(vUv);\ndiffuseColor.rgb = LATTE.rgb;')
-        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.62, LATTE.a);');
+        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.6, LATTE.a);');
     };
-    liquidMat.customProgramCacheKey = function () { return 'velluto-latte'; };
+    liquidMat.customProgramCacheKey = function () { return 'velluto-latte-art'; };
 
     /* ----- cup rig ----- */
     var cupRig = new THREE.Group();   // per-mode placement
