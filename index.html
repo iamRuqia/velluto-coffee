@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Velluto Coffee Atelier</title>
+<meta name="description" content="Velluto is a coffee atelier and small-batch roastery. Explore our espresso bar menu, follow the journey from bean to cup, and find our opening hours.">
+<meta name="theme-color" content="#1b100b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Velluto Coffee Atelier · More than coffee">
+<meta property="og:description" content="Small-batch roasted coffee, pulled and poured by hand. Menu, story and opening hours.">
+<script>document.documentElement.classList.add('js');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=DM+Mono:wght@300;400&family=Jost:wght@300..600&display=swap">
+<link rel="stylesheet" href="css/main.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CafeOrCoffeeShop", "name": "Velluto Coffee Atelier", "description": "Coffee atelier and small-batch roastery.", "servesCuisine": "Coffee", "priceRange": "$$", "address": {"@type": "PostalAddress", "streetAddress": "48 Roastery Lane", "addressLocality": "Your City", "postalCode": "00000"}, "telephone": "+1-555-010-2026", "email": "hello@velluto.example", "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "opens": "07:00", "closes": "19:00"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "08:00", "closes": "20:00"}, {"@type": "OpeningHoursSpecification", "dayOfWeek": "Sunday", "opens": "08:00", "closes": "17:00"}], "hasMenu": {"@type": "Menu", "hasMenuSection": {"@type": "MenuSection", "name": "Espresso bar", "hasMenuItem": [{"@type": "MenuItem", "name": "Espresso", "description": "A double shot pulled short and syrupy, with a hazelnut crema that holds its shape.", "offers": {"@type": "Offer", "price": "2.80", "priceCurrency": "USD"}}, {"@type": "MenuItem", "name": "Cappuccino", "description": "Equal parts espresso, steamed milk and velvet foam, finished with a dusting of cocoa.", "offers": {"@type": "Offer", "price": "4.20", "priceCurrency": "USD"}}, {"@type": "MenuItem", "name": "Latte", "description": "A double shot under silky microfoam, poured slowly into a tall glass and finished with a rosetta.", "offers": {"@type": "Offer", "price": "4.50", "priceCurrency": "USD"}}, {"@type": "MenuItem", "name": "Mocha", "description": "Espresso and 70% dark chocolate, topped with whipped cream and a warm chocolate drizzle.", "offers": {"@type": "Offer", "price": "4.90", "priceCurrency": "USD"}}, {"@type": "MenuItem", "name": "Americano", "description": "A double shot opened up with hot water for a long, clean cup that keeps its crema.", "offers": {"@type": "Offer", "price": "3.60", "priceCurrency": "USD"}}, {"@type": "MenuItem", "name": "Macchiato", "description": "Our espresso, marked with a spoonful of milk foam to round off its edges.", "offers": {"@type": "Offer", "price": "3.00", "priceCurrency": "USD"}}]}}}</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- loader: an espresso shot pulled while the page warms up -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader__inner">
+    <svg class="loader__cup" viewBox="0 0 120 120">
+      <defs>
+        <linearGradient id="crema" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#d9a05f"/>
+          <stop offset="0.14" stop-color="#8a4f26"/>
+          <stop offset="1" stop-color="#341a0c"/>
+        </linearGradient>
+        <clipPath id="cupclip"><path d="M30 50h60v18c0 16.6-13.4 30-30 30S30 84.6 30 68z"/></clipPath>
+      </defs>
+      <line class="loader__stream" x1="60" y1="2" x2="60" y2="94"/>
+      <g clip-path="url(#cupclip)"><rect class="loader__fill" id="loader-fill" x="28" y="48" width="64" height="52"/></g>
+      <path class="stroke" d="M30 50h60v18c0 16.6-13.4 30-30 30S30 84.6 30 68z"/>
+      <path class="stroke" d="M90 56h5a9 9 0 0 1 0 18h-7"/>
+      <path class="stroke" d="M18 106h84"/>
+    </svg>
+    <p class="loader__brand">Velluto</p>
+    <p class="loader__meta"><span>Extracting · 18 g → 36 g</span><span class="loader__time" id="loader-time">00.0 s</span></p>
+  </div>
+</div>
+
+<div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
+<div class="cursor" id="cursor" aria-hidden="true"><span class="cursor__ring"><span class="cursor__label">View</span></span><span class="cursor__dot"></span></div>
+<canvas class="webgl" id="webgl" aria-hidden="true"></canvas>
+
+<!-- ============================== NAV ============================== -->
+<header class="nav" id="nav">
+  <div class="nav__inner">
+    <a class="brand" href="#top" aria-label="Velluto, back to top">
+      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><ellipse cx="16" cy="16" rx="8.6" ry="12.6" transform="rotate(32 16 16)" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.9 23.4c3.9-2.3 1.7-6.2 5-8.4 3.2-2.1 2.3-5.4 5.2-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span><span class="brand__word">Velluto</span><span class="brand__sub">Coffee Atelier</span></span>
+    </a>
+    <nav aria-label="Primary">
+      <ul class="nav__links">
+        <li><a href="#menu" data-nav="menu">Menu</a></li>
+        <li><a href="#beans" data-nav="beans">The journey</a></li>
+        <li><a href="#story" data-nav="story">Our story</a></li>
+        <li><a href="#specialty" data-nav="specialty">Signature pours</a></li>
+        <li><a href="#visit" data-nav="visit">Visit</a></li>
+      </ul>
+    </nav>
+    <div class="nav__actions">
+      <button class="sound-toggle" type="button" aria-pressed="false" aria-label="Sound for hover effects" data-sound>
+        <svg class="icon i-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <line x1="22" x2="16" y1="9" y2="15" /> <line x1="16" x2="22" y1="9" y2="15" /></svg><svg class="icon i-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <path d="M16 9a5 5 0 0 1 0 6" /> <path d="M19.364 18.364a9 9 0 0 0 0-12.728" /></svg>
+        <span class="sound-toggle__text">Sound</span>
+        <span class="sound-toggle__bars" aria-hidden="true"><i></i><i></i><i></i></span>
+      </button>
+      <a class="btn btn--small nav__visit" href="#visit">Visit us</a>
+      <button class="burger" type="button" aria-label="Open menu" aria-haspopup="dialog" aria-controls="mobile-menu" id="burger"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="4" x2="20" y1="12" y2="12" /> <line x1="4" x2="20" y1="6" y2="6" /> <line x1="4" x2="20" y1="18" y2="18" /></svg></button>
+    </div>
+  </div>
+</header>
+
+<dialog class="mobile-menu" id="mobile-menu" aria-label="Site menu">
+  <div class="mobile-menu__top">
+    <a class="brand" href="#top" data-close-menu><svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><ellipse cx="16" cy="16" rx="8.6" ry="12.6" transform="rotate(32 16 16)" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.9 23.4c3.9-2.3 1.7-6.2 5-8.4 3.2-2.1 2.3-5.4 5.2-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="brand__word">Velluto</span></a>
+    <button class="icon-btn" type="button" data-close-menu aria-label="Close menu" autofocus><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button>
+  </div>
+  <ul class="mobile-menu__links">
+    <li><a href="#menu" data-close-menu>Menu <span>Six classics</span></a></li>
+    <li><a href="#beans" data-close-menu>Journey <span>Bean to cup</span></a></li>
+    <li><a href="#story" data-close-menu>Story <span>Since 2014</span></a></li>
+    <li><a href="#specialty" data-close-menu>Pours <span>Signature</span></a></li>
+    <li><a href="#visit" data-close-menu>Visit <span>Hours</span></a></li>
+  </ul>
+  <div class="mobile-menu__foot">
+    <button class="sound-toggle" type="button" aria-pressed="false" data-sound>
+      <svg class="icon i-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <line x1="22" x2="16" y1="9" y2="15" /> <line x1="16" x2="22" y1="9" y2="15" /></svg><svg class="icon i-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /> <path d="M16 9a5 5 0 0 1 0 6" /> <path d="M19.364 18.364a9 9 0 0 0 0-12.728" /></svg>
+      <span class="sound-toggle__text">Hover sounds</span>
+      <span class="sound-toggle__bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
+    <span class="today-hours">Open daily from 07:00</span>
+  </div>
+</dialog>
+
+<main id="main">
+  <!-- ============================== HERO ============================== -->
+  <section class="hero" id="top" aria-labelledby="hero-title" data-section="top">
+    <div class="hero__bg" aria-hidden="true"></div>
+    <h1 class="hero__title" id="hero-title">
+      <span class="sr-only">More than coffee. It's an experience.</span>
+      <span class="hero__line hero__line--1" aria-hidden="true" data-split>More than coffee.</span>
+      <span class="hero__line hero__line--2" aria-hidden="true" data-split>It's an <em>experience.</em></span>
+    </h1>
+    <div class="hero__stage" id="hero-stage" aria-hidden="true">
+      <img class="hero__fallback" src="img/cup-hero-700.webp" srcset="img/cup-hero-700.webp 700w, img/cup-hero-1200.webp 1200w" sizes="(min-width: 900px) 40vw, 90vw" width="1200" height="800" alt="" decoding="async" loading="lazy">
+    </div>
+    <div class="hero__intro">
+      <p class="hero__sub">Discover the art of extraordinary coffee. Crafted with passion, served with perfection.</p>
+      <div class="hero__actions">
+        <a class="btn" href="#menu">Explore our coffee <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></a>
+        <a class="btn btn--ghost" href="#story">Discover our story <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></a>
+      </div>
+    </div>
+    <aside class="hero__note" aria-label="On the bar today">
+      <p class="eyebrow">On the bar today</p>
+      <p class="hero__note-title">Huila, Colombia</p>
+      <p class="hero__note-meta">Washed Caturra · grown at 1,750 m</p>
+      <div class="hero__note-rule"></div>
+      <p class="hero__note-notes">Cocoa nib, panela, red cherry</p>
+      <p class="mono">18 g → 36 g · 28 s · 93 °C</p>
+    </aside>
+    <div class="hero__cue" aria-hidden="true">
+      <span class="cue"><span class="cue__drip"></span>Scroll to explore</span>
+      <span>Roasted in-house every Tuesday</span>
+    </div>
+  </section>
+
+  <!-- ============================== MENU ============================== -->
+  <section class="menu" id="menu" aria-labelledby="menu-title" data-section="menu" data-light>
+    <div class="pour-edge" aria-hidden="true">
+      <svg viewBox="0 0 1440 120" preserveAspectRatio="none"><path id="pour-path" fill="currentColor" d="M0,120 L0,78 C180,40 360,18 560,34 C760,50 900,96 1100,92 C1260,88 1360,60 1440,44 L1440,120 Z"/></svg>
+    </div>
+    <div class="wrap">
+      <header class="section-head">
+        <div class="section-head__title">
+          <p class="eyebrow">The menu</p>
+          <h2 class="display" id="menu-title">Pulled, poured, <em>perfected.</em></h2>
+        </div>
+        <div class="section-head__aside">
+          <p class="lead">Six classics from our espresso bar, each built on a double shot of the house blend and milk steamed to order. Open any cup for its full brew recipe.</p>
+          <p class="menu__legend"><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="10" x2="14" y1="2" y2="2" /> <line x1="12" x2="15" y1="14" y2="11" /> <circle cx="12" cy="14" r="8" /></svg> Shot 28 s</span><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" /></svg> Water 93 °C</span><span><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z" /> <path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97" /></svg> Milk 60–65 °C</span></p>
+        </div>
+      </header>
+      <ul class="menu__grid" role="list">
+        <li class="product">
+          <article class="product__card" data-tilt data-cursor="view" data-open="espresso">
+            <div class="product__media" style="--lqip:url(data:image/webp;base64,UklGRtYAAABXRUJQVlA4IMoAAADQBQCdASoYABQAPu1srFEppaQiqAqpMB2JZACdMuN/UkgAlWE87NuA9C5hBcM2TDUE/BRffsfAAP7karWX+bSam3m974z0S6Qkvvn5Wi9eojhbql09uc699MB84heUzxn+gtDJLU7N+wBryl9julREub64HUOvDKyt7kvT1bqMj7vVy7UlPG6Zo+iroBBZ4oZOTOPfVDvWjpI4MQCRufDacAZON1vsPD2N+2eGTrOdqO8F/F3N5bWF5ic9K4X6pj/ZB0EthqlU7AAA)">
+              <img src="img/espresso-640.webp" srcset="img/espresso-640.webp 640w, img/espresso-1080.webp 1080w" sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, 92vw" width="1080" height="909" alt="Espresso in a brown ceramic cup beside a burlap sack of roasted beans, steam rising" decoding="async" loading="lazy">
+              <span class="product__glare" aria-hidden="true"></span>
+              <span class="product__badge">18 g → 36 g · 28 s</span>
+            </div>
+            <div class="product__body">
+              <p class="product__kicker">Espresso · Hot</p>
+              <div class="product__row">
+                <h3 class="product__name">Espresso</h3>
+                <span class="product__leader" aria-hidden="true"></span>
+                <p class="product__price"><span class="sr-only">From </span>$2.80</p>
+              </div>
+              <p class="product__desc">A double shot pulled short and syrupy, with a hazelnut crema that holds its shape.</p>
+              <button class="product__cta" type="button" data-open="espresso" aria-haspopup="dialog">View details<span class="sr-only">: Espresso</span> <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+            </div>
+          </article>
+        </li>
+        <li class="product">
+          <article class="product__card" data-tilt data-cursor="view" data-open="cappuccino">
+            <div class="product__media" style="--lqip:url(data:image/webp;base64,UklGRuoAAABXRUJQVlA4IN4AAABQBQCdASoYABUAPu1urlIppiQiqAgBMB2JagCdMoSA/3+A2OvxMSohQssi3kNklmE+W4AA/tunxjgbA31yJgEySu0uLBigHkrm/RW+YrobzCdVx8xTSGnoIk/MgoIa2l7LqjZWlVuDoM/ox/x0qZJVCYxPwwd/bbDj/UVcEB4KL+HVx/8j1Y3bYOZ6Q/U6OdKE3f3d+RU4VnUK5IojiDpPSbJoaaYzwv1DGZtgHrggwHun1Oa/HxdAOkMGhEICc4cmJiNsp4Hz+o0jkzl+/Vj9TApiIINKqze84IIpAAA=)">
+              <img src="img/cappuccino-640.webp" srcset="img/cappuccino-640.webp 640w, img/cappuccino-1080.webp 1080w" sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, 92vw" width="1080" height="925" alt="Cappuccino dusted with cocoa on a saucer with cinnamon sticks and coffee beans" decoding="async" loading="lazy">
+              <span class="product__glare" aria-hidden="true"></span>
+              <span class="product__badge">180 ml · 62 °C microfoam</span>
+            </div>
+            <div class="product__body">
+              <p class="product__kicker">Milk · Hot</p>
+              <div class="product__row">
+                <h3 class="product__name">Cappuccino</h3>
+                <span class="product__leader" aria-hidden="true"></span>
+                <p class="product__price"><span class="sr-only">From </span>$4.20</p>
+              </div>
+              <p class="product__desc">Equal parts espresso, steamed milk and velvet foam, finished with a dusting of cocoa.</p>
+              <button class="product__cta" type="button" data-open="cappuccino" aria-haspopup="dialog">View details<span class="sr-only">: Cappuccino</span> <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+            </div>
+          </article>
+        </li>
+        <li class="product">
+          <article class="product__card" data-tilt data-cursor="view" data-open="latte">
+            <div class="product__media" style="--lqip:url(data:image/webp;base64,UklGRuAAAABXRUJQVlA4INQAAAAQBgCdASoYABUAPu1sq1EppaOiqAqpMB2JZgCdMzQ7RaAALREKm1fJDafR4RXVoHYvYUIeRlBMj0AA/sxXWiVwPmmTwkd8Vir7zFozuTP0RKEBFmMog8cs4YurruPdBFm9QZsNolsooG788dX5LVu8KIK5fRaKDLsZe9uMo8Y4VrPEgvzxQbU7UVp8A4LjkShZto0kCbkAuXRaGhLZfoZgfOYjKKTfsgogPL+JfHF4GYBHxm3YpAAWdgD/JiWIEQD3IBW1QglxQiNjUnEHNFay6tMAAA==)">
+              <img src="img/latte-640.webp" srcset="img/latte-640.webp 640w, img/latte-1080.webp 1062w" sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, 92vw" width="1062" height="928" alt="Latte in a tall glass with rosetta latte art, on a wooden board beside a spoon" decoding="async" loading="lazy">
+              <span class="product__glare" aria-hidden="true"></span>
+              <span class="product__badge">300 ml · rosetta pour</span>
+            </div>
+            <div class="product__body">
+              <p class="product__kicker">Milk · Hot</p>
+              <div class="product__row">
+                <h3 class="product__name">Latte</h3>
+                <span class="product__leader" aria-hidden="true"></span>
+                <p class="product__price"><span class="sr-only">From </span>$4.50</p>
+              </div>
+              <p class="product__desc">A double shot under silky microfoam, poured slowly into a tall glass and finished with a rosetta.</p>
+              <button class="product__cta" type="button" data-open="latte" aria-haspopup="dialog">View details<span class="sr-only">: Latte</span> <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+            </div>
+          </article>
+        </li>
+        <li class="product">
+          <article class="product__card" data-tilt data-cursor="view" data-open="mocha">
+            <div class="product__media" style="--lqip:url(data:image/webp;base64,UklGRsAAAABXRUJQVlA4ILQAAAAQBQCdASoYABQAPu1qrFEppaQiqAqpMB2JZgCdM0LBrVra3buiucAA8NbRFn+K3vkAAP7p9Vq77YjVebr9ICyq8hnLnc4FYSHTYprWH23O4XoVh4lDCQGQvsf5NF7TJVx+L1+cltnJnUvfRLv1gATDhq264K7dMFUxgylxpeazHr/yHWr4qghi1maWFF/Ch9oOX0Gf1O0qJmgUJ6M1YuhqvntGxZuuzkg86dsbUZIhHF8pBAA=)">
+              <img src="img/mocha-640.webp" srcset="img/mocha-640.webp 640w, img/mocha-1080.webp 1080w" sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, 92vw" width="1080" height="914" alt="Mocha in a glass mug with whipped cream and chocolate sauce running down the sides, next to dark chocolate" decoding="async" loading="lazy">
+              <span class="product__glare" aria-hidden="true"></span>
+              <span class="product__badge">320 ml · 70% dark chocolate</span>
+            </div>
+            <div class="product__body">
+              <p class="product__kicker">Chocolate · Hot</p>
+              <div class="product__row">
+                <h3 class="product__name">Mocha</h3>
+                <span class="product__leader" aria-hidden="true"></span>
+                <p class="product__price"><span class="sr-only">From </span>$4.90</p>
+              </div>
+              <p class="product__desc">Espresso and 70% dark chocolate, topped with whipped cream and a warm chocolate drizzle.</p>
+              <button class="product__cta" type="button" data-open="mocha" aria-haspopup="dialog">View details<span class="sr-only">: Mocha</span> <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+            </div>
+          </article>
+        </li>
+        <li class="product">
+          <article class="product__card" data-tilt data-cursor="view" data-open="americano">
+            <div class="product__media" style="--lqip:url(data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAADwBQCdASoYABQAPu1qqFCppaOiqA1RMB2JZACdMoRwKGTh/gHpC3b5ZzCwIujywCygduKZ37YPuAD+6NkgyQGiy44LMlB01j91EANQy/T3Zl64r1LmcoLHFmnGUhZFToB8jzl7n/WWnNHnGVMn+aaN0J7qD7t5LN5t6IqBnLS4PiE8eUDE4UzeKThJDnGTPZZjxLB/cq9bxFLIkKOVA/WmtPggvJxr3ybg1uthNXGeuPBrd/sptQDAAAA=)">
+              <img src="img/americano-640.webp" srcset="img/americano-640.webp 640w, img/americano-1080.webp 1080w" sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, 92vw" width="1080" height="897" alt="Hot coffee poured from a glass jug into a glass cup on a wooden table" decoding="async" loading="lazy">
+              <span class="product__glare" aria-hidden="true"></span>
+              <span class="product__badge">240 ml · double shot + water</span>
+            </div>
+            <div class="product__body">
+              <p class="product__kicker">Espresso · Long</p>
+              <div class="product__row">
+                <h3 class="product__name">Americano</h3>
+                <span class="product__leader" aria-hidden="true"></span>
+                <p class="product__price"><span class="sr-only">From </span>$3.60</p>
+              </div>
+              <p class="product__desc">A double shot opened up with hot water for a long, clean cup that keeps its crema.</p>
+              <button class="product__cta" type="button" data-open="americano" aria-haspopup="dialog">View details<span class="sr-only">: Americano</span> <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+            </div>
+          </article>
+        </li>
+        <li class="product">
+          <article class="product__card" data-tilt data-cursor="view" data-open="macchiato">
+            <div class="product__media" style="--lqip:url(data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAADQBACdASoYABUAPu1ur1IppiQiqAgBMB2JQBOmUI9JAllG+aOa3hBy6OpqjH1rAAD+6/4/SEvwV5ImgaQu7ktaJuSl1FhYbs2fxyl3GLETlZ25McCqliX8DR6TL5+DfjC4vA9lQu4ZS5fHzRnr6Xz0z82DEszPlQ15yDQp8ycd0aBbgwhGyE2tFI5l6K6S8aFfMZkDrCEdUxPE6bgqwaKnbarqFxlurhajHw3CAAA=)">
+              <img src="img/macchiato-640.webp" srcset="img/macchiato-640.webp 640w, img/macchiato-1080.webp 1080w" sizes="(min-width: 1024px) 30vw, (min-width: 600px) 46vw, 92vw" width="1080" height="925" alt="Macchiato with a dot of milk foam in a glossy brown cup, steam rising, beans spilling from a burlap sack" decoding="async" loading="lazy">
+              <span class="product__glare" aria-hidden="true"></span>
+              <span class="product__badge">90 ml · espresso + foam</span>
+            </div>
+            <div class="product__body">
+              <p class="product__kicker">Espresso · Hot</p>
+              <div class="product__row">
+                <h3 class="product__name">Macchiato</h3>
+                <span class="product__leader" aria-hidden="true"></span>
+                <p class="product__price"><span class="sr-only">From </span>$3.00</p>
+              </div>
+              <p class="product__desc">Our espresso, marked with a spoonful of milk foam to round off its edges.</p>
+              <button class="product__cta" type="button" data-open="macchiato" aria-haspopup="dialog">View details<span class="sr-only">: Macchiato</span> <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============================== BEANS ============================== -->
+  <section class="beans" id="beans" aria-labelledby="beans-title" data-section="beans">
+    <div class="beans__intro">
+      <img class="beans__photo" src="img/beans-floating-640.webp" srcset="img/beans-floating-640.webp 640w, img/beans-floating-1000.webp 1000w" sizes="100vw" width="1000" height="995" alt="Roasted coffee beans floating against a dark background" decoding="async" loading="lazy">
+      <div class="wrap beans__head">
+        <p class="eyebrow">The journey</p>
+        <h2 class="display" id="beans-title">From the bean to the <em>perfect cup.</em></h2>
+        <p class="lead">Every cup we pour starts as a green seed on a mountainside far from here. Keep scrolling to follow one harvest from the farm to your table.</p>
+      </div>
+    </div>
+    <div class="journey" id="journey">
+      <div class="journey__bg" aria-hidden="true"></div>
+      <div class="journey__shade" aria-hidden="true"></div>
+      <div class="wrap journey__grid">
+        <ol class="journey__rail" aria-label="Journey steps">
+          <li><a href="#step-origin" data-step-link="0"><span>01</span>Origin</a></li>
+          <li><a href="#step-harvest" data-step-link="1"><span>02</span>Harvest</a></li>
+          <li><a href="#step-roast" data-step-link="2"><span>03</span>Roast</a></li>
+          <li><a href="#step-grind" data-step-link="3"><span>04</span>Grind</a></li>
+          <li><a href="#step-brew" data-step-link="4"><span>05</span>Brew</a></li>
+        </ol>
+        <ol class="steps">
+          <li class="step" id="step-origin" data-step="0">
+            <p class="step__num">01 <span>/ 05</span></p>
+            <h3 class="step__title">Origin</h3>
+            <p class="step__text">Our beans grow on steep volcanic slopes, where cool nights slow the cherries down and give their sugars time to build.</p>
+            <p class="step__spec"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m8 3 4 8 5-5 5 15H2L8 3z" /></svg> Altitude 1,600–2,100 m</p>
+          </li>
+          <li class="step" id="step-harvest" data-step="1">
+            <p class="step__num">02 <span>/ 05</span></p>
+            <h3 class="step__title">Harvest</h3>
+            <p class="step__text">Pickers return to each tree several times and take only the ripe red cherries. The seeds are washed, dried on raised beds and sorted by hand.</p>
+            <p class="step__spec"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2" /> <path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2" /> <path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8" /> <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" /></svg> Hand-picked · 18–21 days drying</p>
+          </li>
+          <li class="step" id="step-roast" data-step="2">
+            <p class="step__num">03 <span>/ 05</span></p>
+            <h3 class="step__title">Roast</h3>
+            <p class="step__text">We roast in small batches twice a week and stop just after first crack, when caramel and cocoa notes are at their fullest.</p>
+            <p class="step__spec"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg> First crack 196 °C · Agtron 55</p>
+            <figure class="step__figure">
+              <div class="frame" style="--lqip:url(data:image/webp;base64,UklGRiYBAABXRUJQVlA4IBoBAADQBQCdASoYABUAPu1ur1IppiQiqAgBMB2JbACdMoS0D45wXgUAguJqyLUguCHFvkEpxRziOCAAAP6lQSm4YAMSdWrjHXGPx9H8lS86jhQjLRVfRHDDhD6Gr67cR9XznFDREtE0HEak16eZUPgORqVZp3C9WzCvioowUoqz4rdWmni/STMWALDwIsJerpUHouIf/TrPlsqvnSUECdSH5CoW+OXgFsP8xuMjs0EIcPGcnTINSbHXqKgeKAamDbOVvZSS0oaYm+D3Mh4PWMXx9gAUYM7Lc76lHvh7BOZkzD2vaKItJDqKzUZGwUSPdviCH+qpIMiboMzEIUP9ZxFAnc3dD/OB2KyAebTcDSkmaqMPkAATPWmDY90AAAA=)"><img src="img/beans-closeup-640.webp" srcset="img/beans-closeup-640.webp 640w, img/beans-closeup-1080.webp 1062w" sizes="132px" width="1062" height="912" alt="Close-up of glossy, freshly roasted coffee beans" decoding="async" loading="lazy"></div>
+              <figcaption>Out of the roaster, with the oils just rising to the surface.</figcaption>
+            </figure>
+          </li>
+          <li class="step" id="step-grind" data-step="3">
+            <p class="step__num">04 <span>/ 05</span></p>
+            <h3 class="step__title">Grind</h3>
+            <p class="step__text">Roasted beans rest for a week, then meet the grinder seconds before brewing, so the aroma ends up in your cup instead of the air.</p>
+            <p class="step__spec"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" /> <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" /> <path d="M12 2v2" /> <path d="M12 22v-2" /> <path d="m17 20.66-1-1.73" /> <path d="M11 10.27 7 3.34" /> <path d="m20.66 17-1.73-1" /> <path d="m3.34 7 1.73 1" /> <path d="M14 12h8" /> <path d="M2 12h2" /> <path d="m20.66 7-1.73 1" /> <path d="m3.34 17 1.73-1" /> <path d="m17 3.34-1 1.73" /> <path d="m11 13.73-4 6.93" /></svg> Espresso grind · 250 µm</p>
+          </li>
+          <li class="step" id="step-brew" data-step="4">
+            <p class="step__num">05 <span>/ 05</span></p>
+            <h3 class="step__title">Brew</h3>
+            <p class="step__text">Water meets the coffee at 9 bar for 28 seconds. Eighteen grams in, thirty-six out, under a crown of hazelnut crema.</p>
+            <p class="step__spec"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 14 4-4" /> <path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg> 9 bar · 93 °C · ratio 1:2</p>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== STORY ============================== -->
+  <section class="story" id="story" aria-labelledby="story-title" data-section="story">
+    <div class="wrap">
+      <header class="story__head">
+        <p class="eyebrow">Our story</p>
+        <h2 class="display" id="story-title">Every cup has <br>a <em>story.</em></h2>
+      </header>
+      <div class="story__spread">
+        <figure class="story__main">
+          <div class="frame" style="--lqip:url(data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAADwBQCdASoYABQAPu1qqFCppaOiqA1RMB2JZACdMoRwKGTh/gHpC3b5ZzCwIujywCygduKZ37YPuAD+6NkgyQGiy44LMlB01j91EANQy/T3Zl64r1LmcoLHFmnGUhZFToB8jzl7n/WWnNHnGVMn+aaN0J7qD7t5LN5t6IqBnLS4PiE8eUDE4UzeKThJDnGTPZZjxLB/cq9bxFLIkKOVA/WmtPggvJxr3ybg1uthNXGeuPBrd/sptQDAAAA=)"><img src="img/americano-640.webp" srcset="img/americano-640.webp 640w, img/americano-1080.webp 1080w" sizes="(min-width: 900px) 48vw, 92vw" width="1080" height="897" alt="Coffee being poured from a glass jug into a glass cup" decoding="async" loading="lazy"></div>
+          <figcaption>06:58, the first pour of the morning.</figcaption>
+        </figure>
+        <figure class="story__side" aria-hidden="true">
+          <div class="frame" style="--lqip:url(data:image/webp;base64,UklGRtYAAABXRUJQVlA4IMoAAADQBQCdASoYABQAPu1srFEppaQiqAqpMB2JZACdMuN/UkgAlWE87NuA9C5hBcM2TDUE/BRffsfAAP7karWX+bSam3m974z0S6Qkvvn5Wi9eojhbql09uc699MB84heUzxn+gtDJLU7N+wBryl9julREub64HUOvDKyt7kvT1bqMj7vVy7UlPG6Zo+iroBBZ4oZOTOPfVDvWjpI4MQCRufDacAZON1vsPD2N+2eGTrOdqO8F/F3N5bWF5ic9K4X6pj/ZB0EthqlU7AAA)"><img src="img/espresso-640.webp" srcset="img/espresso-640.webp 640w, img/espresso-1080.webp 1080w" sizes="(min-width: 900px) 24vw, 50vw" width="1080" height="909" alt="" decoding="async" loading="lazy"></div>
+        </figure>
+        <div class="story__text">
+          <p class="dropcap">Velluto began in 2014 with a secondhand lever machine, four stools and one rule: never serve a cup we would not happily drink ourselves.</p>
+          <p>The name means velvet in Italian, which is how good crema should feel. We still chase that texture every morning, adjusting the grind as the weather changes and tasting each batch before it reaches the bar.</p>
+          <p>Today we roast our own beans, buy directly from the farms we visit, and still know most of our regulars by their order.</p>
+          <blockquote class="pull">“We roast on Tuesday, taste on Wednesday, and argue about it until Friday.”<cite>The Velluto roasting team</cite></blockquote>
+        </div>
+      </div>
+      <ol class="timeline" aria-label="Milestones">
+        <li><span class="timeline__year">2014</span><p class="timeline__text">A four-stool espresso bar opens with a single lever machine.</p></li>
+        <li><span class="timeline__year">2017</span><p class="timeline__text">Our own 5 kg roaster arrives in the back room.</p></li>
+        <li><span class="timeline__year">2021</span><p class="timeline__text">We begin buying directly from three family farms.</p></li>
+        <li><span class="timeline__year">2026</span><p class="timeline__text">Twelve tonnes a year, still roasted in small batches.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================== SPECIALTY ============================== -->
+  <section class="specialty" id="specialty" aria-labelledby="specialty-title" data-section="specialty">
+    <div class="wrap specialty__intro">
+      <div>
+        <p class="eyebrow">Specialty</p>
+        <h2 class="display" id="specialty-title">Signature <em>pours.</em></h2>
+      </div>
+      <p class="lead">Three drinks our regulars come back for, each finished by hand at the bar.</p>
+    </div>
+    <div class="specialty__pin" id="specialty-pin">
+      <div class="specialty__track" id="specialty-track">
+        <article class="pour pour--cappuccino" aria-labelledby="pour-cappuccino">
+          <span class="pour__word" aria-hidden="true">Cappuccino</span>
+          <div class="pour__info">
+            <p class="eyebrow">The classic</p>
+            <h3 class="pour__name" id="pour-cappuccino">Cappuccino</h3>
+            <p class="pour__text">A double shot under a thick, glossy cap of foam, dusted with cocoa and served with a cinnamon stick on the side.</p>
+            <dl class="pour__specs"><div><dt>Milk</dt><dd>62 °C</dd></div><div><dt>Foam</dt><dd>1.5 cm</dd></div><div><dt>Cup</dt><dd>180 ml</dd></div></dl>
+            <button class="link-arrow" type="button" data-open="cappuccino" aria-haspopup="dialog">View the recipe <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+          </div>
+          <div class="pour__stage">
+            <span class="pour__shadow" aria-hidden="true"></span>
+            <img class="pour__product" src="img/cut-cappuccino-560.webp" srcset="img/cut-cappuccino-560.webp 560w, img/cut-cappuccino-960.webp 960w" sizes="(min-width: 900px) 46vw, 90vw" width="960" height="692" alt="Cappuccino with cocoa dusting on a saucer with cinnamon sticks and coffee beans" decoding="async" loading="lazy">
+            <span class="pour__badge" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><path id="badge-cappuccino" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"/></defs><text textLength="234" lengthAdjust="spacing"><textPath href="#badge-cappuccino">Signature pour · Velluto · since 2014 ·</textPath></text></svg><svg class="bean" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><ellipse cx="16" cy="16" rx="8.6" ry="12.6" transform="rotate(32 16 16)" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.9 23.4c3.9-2.3 1.7-6.2 5-8.4 3.2-2.1 2.3-5.4 5.2-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          </div>
+          <p class="pour__count" aria-hidden="true">01 / 03</p>
+        </article>
+        <article class="pour pour--latte" aria-labelledby="pour-latte">
+          <span class="pour__word" aria-hidden="true">Latte</span>
+          <div class="pour__info">
+            <p class="eyebrow">The slow one</p>
+            <h3 class="pour__name" id="pour-latte">Latte</h3>
+            <p class="pour__text">Silky microfoam poured in a slow, steady stream until a rosetta opens on top. Mild, sweet and made for lingering.</p>
+            <dl class="pour__specs"><div><dt>Milk</dt><dd>60 °C</dd></div><div><dt>Foam</dt><dd>0.5 cm</dd></div><div><dt>Glass</dt><dd>300 ml</dd></div></dl>
+            <button class="link-arrow" type="button" data-open="latte" aria-haspopup="dialog">View the recipe <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+          </div>
+          <div class="pour__stage">
+            <span class="pour__shadow" aria-hidden="true"></span>
+            <img class="pour__product" src="img/cut-latte-560.webp" srcset="img/cut-latte-560.webp 507w" sizes="(min-width: 900px) 46vw, 90vw" width="507" height="836" alt="Latte in a tall glass with rosetta latte art" decoding="async" loading="lazy">
+            <span class="pour__badge" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><path id="badge-latte" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"/></defs><text textLength="234" lengthAdjust="spacing"><textPath href="#badge-latte">Signature pour · Velluto · since 2014 ·</textPath></text></svg><svg class="bean" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><ellipse cx="16" cy="16" rx="8.6" ry="12.6" transform="rotate(32 16 16)" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.9 23.4c3.9-2.3 1.7-6.2 5-8.4 3.2-2.1 2.3-5.4 5.2-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          </div>
+          <p class="pour__count" aria-hidden="true">02 / 03</p>
+        </article>
+        <article class="pour pour--mocha" aria-labelledby="pour-mocha">
+          <span class="pour__word" aria-hidden="true">Mocha</span>
+          <div class="pour__info">
+            <p class="eyebrow">The indulgent one</p>
+            <h3 class="pour__name" id="pour-mocha">Mocha</h3>
+            <p class="pour__text">Our espresso melted into 70% dark chocolate, topped with whipped cream and a ribbon of warm chocolate sauce.</p>
+            <dl class="pour__specs"><div><dt>Chocolate</dt><dd>70%</dd></div><div><dt>Milk</dt><dd>62 °C</dd></div><div><dt>Glass</dt><dd>320 ml</dd></div></dl>
+            <button class="link-arrow" type="button" data-open="mocha" aria-haspopup="dialog">View the recipe <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></button>
+          </div>
+          <div class="pour__stage">
+            <span class="pour__shadow" aria-hidden="true"></span>
+            <img class="pour__product" src="img/cut-mocha-560.webp" srcset="img/cut-mocha-560.webp 560w, img/cut-mocha-960.webp 829w" sizes="(min-width: 900px) 46vw, 90vw" width="829" height="884" alt="Mocha in a glass mug topped with whipped cream and chocolate sauce" decoding="async" loading="lazy">
+            <span class="pour__badge" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><path id="badge-mocha" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"/></defs><text textLength="234" lengthAdjust="spacing"><textPath href="#badge-mocha">Signature pour · Velluto · since 2014 ·</textPath></text></svg><svg class="bean" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><ellipse cx="16" cy="16" rx="8.6" ry="12.6" transform="rotate(32 16 16)" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.9 23.4c3.9-2.3 1.7-6.2 5-8.4 3.2-2.1 2.3-5.4 5.2-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+          </div>
+          <p class="pour__count" aria-hidden="true">03 / 03</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================== FINALE ============================== -->
+  <section class="finale" id="visit" aria-labelledby="visit-title" data-section="visit">
+    <div class="finale__bg" aria-hidden="true"></div>
+    <div class="finale__head">
+      <p class="eyebrow">Visit us</p>
+      <h2 class="display" id="visit-title">Your cup is <em>waiting.</em></h2>
+    </div>
+    <div class="finale__stage" id="finale-stage" aria-hidden="true">
+      <img class="finale__fallback" src="img/cup-hero-700.webp" srcset="img/cup-hero-700.webp 700w, img/cup-hero-1200.webp 1200w" sizes="(min-width: 900px) 40vw, 90vw" width="1200" height="800" alt="" decoding="async" loading="lazy">
+    </div>
+    <div class="finale__info">
+      <p class="status" id="open-status"><span class="status__dot"></span><span class="status__text">Open daily from 07:00</span></p>
+      <p class="contact-line"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></svg> 48 Roastery Lane, Your City</p>
+      <div class="finale__actions">
+        <a class="btn" href="#menu">See the menu <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></a>
+        <a class="btn btn--ghost" href="#contact">Hours &amp; contact <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14" /> <path d="m19 12-7 7-7-7" /></svg></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="footer" id="contact" data-section="visit">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a class="brand" href="#top"><svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><ellipse cx="16" cy="16" rx="8.6" ry="12.6" transform="rotate(32 16 16)" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.9 23.4c3.9-2.3 1.7-6.2 5-8.4 3.2-2.1 2.3-5.4 5.2-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span><span class="brand__word">Velluto</span><span class="brand__sub">Coffee Atelier</span></span></a>
+        <p>A coffee atelier and roastery. Small batches, careful hands, and a seat for you at the bar.</p>
+        <form class="newsletter" id="newsletter" novalidate>
+          <label for="newsletter-email">Get the next roast in your inbox</label>
+          <div class="newsletter__row">
+            <input id="newsletter-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+            <button type="submit" aria-label="Subscribe"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" /> <path d="m21.854 2.147-10.94 10.939" /></svg></button>
+          </div>
+          <p class="newsletter__msg" id="newsletter-msg" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+      <nav aria-label="Footer">
+        <h3>Explore</h3>
+        <ul class="footer__list">
+          <li><a href="#menu">Menu</a></li>
+          <li><a href="#beans">The journey</a></li>
+          <li><a href="#story">Our story</a></li>
+          <li><a href="#specialty">Signature pours</a></li>
+          <li><a href="#visit">Visit</a></li>
+        </ul>
+      </nav>
+      <div>
+        <h3>Find us</h3>
+        <ul class="footer__list">
+          <li class="contact-line"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /> <circle cx="12" cy="10" r="3" /></svg> <span>48 Roastery Lane, Your City 00000</span></li>
+          <li class="contact-line"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg> <a href="tel:+15550102026">+1 (555) 010-2026</a><button class="copy-btn" type="button" data-copy="+1 (555) 010-2026" aria-label="Copy phone number"><svg class="icon i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><svg class="icon i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg></button></li>
+          <li class="contact-line"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="20" height="16" x="2" y="4" rx="2" /> <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg> <a href="mailto:hello@velluto.example">hello@velluto.example</a><button class="copy-btn" type="button" data-copy="hello@velluto.example" aria-label="Copy email address"><svg class="icon i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><svg class="icon i-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5" /></svg></button></li>
+        </ul>
+        <div class="socials">
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Velluto on Instagram"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect width="20" height="20" x="2" y="2" rx="5" ry="5" /> <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /> <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" /></svg></a>
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Velluto on Facebook"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg></a>
+          <a href="https://www.youtube.com/" target="_blank" rel="noopener" aria-label="Velluto on YouTube"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" /> <path d="m10 15 5-3-5-3z" /></svg></a>
+        </div>
+      </div>
+      <div>
+        <h3>Opening hours</h3>
+        <dl class="hours" id="hours">
+          <div data-days="1,2,3,4,5" data-open="07:00" data-close="19:00"><dt>Monday – Friday</dt><dd>07:00–19:00</dd></div>
+          <div data-days="6" data-open="08:00" data-close="20:00"><dt>Saturday</dt><dd>08:00–20:00</dd></div>
+          <div data-days="0" data-open="08:00" data-close="17:00"><dt>Sunday</dt><dd>08:00–17:00</dd></div>
+        </dl>
+      </div>
+    </div>
+    <p class="footer__word" aria-hidden="true">Velluto</p>
+    <div class="footer__base">
+      <p>© 2026 Velluto Coffee Atelier. All rights reserved.</p>
+      <a class="to-top" href="#top">Back to top <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12 7-7 7 7" /> <path d="M12 19V5" /></svg></a>
+    </div>
+  </div>
+</footer>
+
+<!-- product details -->
+<dialog class="modal" id="product-modal" aria-labelledby="modal-title">
+  <div class="modal__panel" data-lenis-prevent>
+    <button class="icon-btn modal__close" type="button" data-modal-close aria-label="Close details"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></svg></button>
+    <div class="modal__media" id="modal-media">
+      <img id="modal-img" alt="" width="1084" height="912" decoding="async">
+      <p class="modal__index" id="modal-index"></p>
+    </div>
+    <div class="modal__body">
+      <p class="eyebrow" id="modal-kicker"></p>
+      <h2 class="modal__title" id="modal-title"></h2>
+      <p class="modal__desc" id="modal-desc"></p>
+      <ul class="notes" id="modal-notes" aria-label="Tasting notes"></ul>
+      <dl class="brew" id="modal-brew"></dl>
+      <fieldset class="sizes">
+        <legend>Size</legend>
+        <div class="sizes__opts" id="modal-sizes"></div>
+      </fieldset>
+      <div class="modal__foot">
+        <p class="modal__price" id="modal-price" aria-live="polite"></p>
+        <a class="btn" href="#visit" data-modal-close data-goto="visit">Find us &amp; order <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></svg></a>
+        <div class="modal__nav">
+          <button class="icon-btn" type="button" data-modal-step="-1" aria-label="Previous drink"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m15 18-6-6 6-6" /></svg></button>
+          <button class="icon-btn" type="button" data-modal-step="1" aria-label="Next drink"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m9 18 6-6-6-6" /></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="products-data">{"currency": "$", "products": [{"id": "espresso", "name": "Espresso", "kicker": "Espresso · Hot", "desc": "Our house blend pulled as a double shot: dense, sweet and syrupy, with a hazelnut crema that holds for a full minute. Best in three sips, while it is hot.", "notes": ["Dark cocoa", "Toasted hazelnut", "Molasses"], "brew": [["Dose", "18 g"], ["Yield", "36 g"], ["Time", "28 s"], ["Water", "93 °C"]], "sizes": [{"label": "Single", "vol": "30 ml", "price": 2.8}, {"label": "Double", "vol": "60 ml", "price": 3.4}], "img": "img/espresso-1080.webp", "srcset": "img/espresso-640.webp 640w, img/espresso-1080.webp 1080w", "alt": "Espresso in a brown ceramic cup beside a burlap sack of roasted beans, steam rising", "lqip": "data:image/webp;base64,UklGRtYAAABXRUJQVlA4IMoAAADQBQCdASoYABQAPu1srFEppaQiqAqpMB2JZACdMuN/UkgAlWE87NuA9C5hBcM2TDUE/BRffsfAAP7karWX+bSam3m974z0S6Qkvvn5Wi9eojhbql09uc699MB84heUzxn+gtDJLU7N+wBryl9julREub64HUOvDKyt7kvT1bqMj7vVy7UlPG6Zo+iroBBZ4oZOTOPfVDvWjpI4MQCRufDacAZON1vsPD2N+2eGTrOdqO8F/F3N5bWF5ic9K4X6pj/ZB0EthqlU7AAA"}, {"id": "cappuccino", "name": "Cappuccino", "kicker": "Milk · Hot", "desc": "A double shot under steamed milk and a thick cap of glossy foam, finished with cocoa. Rich enough to stand up to the espresso, light enough to finish.", "notes": ["Milk chocolate", "Caramel", "Cinnamon"], "brew": [["Espresso", "36 g"], ["Milk", "62 °C"], ["Foam", "1.5 cm"], ["Cup", "180 ml"]], "sizes": [{"label": "Regular", "vol": "180 ml", "price": 4.2}, {"label": "Large", "vol": "240 ml", "price": 4.8}], "img": "img/cappuccino-1080.webp", "srcset": "img/cappuccino-640.webp 640w, img/cappuccino-1080.webp 1080w", "alt": "Cappuccino dusted with cocoa on a saucer with cinnamon sticks and coffee beans", "lqip": "data:image/webp;base64,UklGRuoAAABXRUJQVlA4IN4AAABQBQCdASoYABUAPu1urlIppiQiqAgBMB2JagCdMoSA/3+A2OvxMSohQssi3kNklmE+W4AA/tunxjgbA31yJgEySu0uLBigHkrm/RW+YrobzCdVx8xTSGnoIk/MgoIa2l7LqjZWlVuDoM/ox/x0qZJVCYxPwwd/bbDj/UVcEB4KL+HVx/8j1Y3bYOZ6Q/U6OdKE3f3d+RU4VnUK5IojiDpPSbJoaaYzwv1DGZtgHrggwHun1Oa/HxdAOkMGhEICc4cmJiNsp4Hz+o0jkzl+/Vj9TApiIINKqze84IIpAAA="}, {"id": "latte", "name": "Latte", "kicker": "Milk · Hot", "desc": "More milk, less foam. Silky microfoam is poured in a slow stream over a double shot until a rosetta opens on top. Mild, sweet and made for lingering.", "notes": ["Sweet cream", "Toffee", "Vanilla"], "brew": [["Espresso", "36 g"], ["Milk", "60 °C"], ["Foam", "0.5 cm"], ["Glass", "300 ml"]], "sizes": [{"label": "Regular", "vol": "300 ml", "price": 4.5}, {"label": "Large", "vol": "400 ml", "price": 5.1}], "img": "img/latte-1080.webp", "srcset": "img/latte-640.webp 640w, img/latte-1080.webp 1062w", "alt": "Latte in a tall glass with rosetta latte art, on a wooden board beside a spoon", "lqip": "data:image/webp;base64,UklGRuAAAABXRUJQVlA4INQAAAAQBgCdASoYABUAPu1sq1EppaOiqAqpMB2JZgCdMzQ7RaAALREKm1fJDafR4RXVoHYvYUIeRlBMj0AA/sxXWiVwPmmTwkd8Vir7zFozuTP0RKEBFmMog8cs4YurruPdBFm9QZsNolsooG788dX5LVu8KIK5fRaKDLsZe9uMo8Y4VrPEgvzxQbU7UVp8A4LjkShZto0kCbkAuXRaGhLZfoZgfOYjKKTfsgogPL+JfHF4GYBHxm3YpAAWdgD/JiWIEQD3IBW1QglxQiNjUnEHNFay6tMAAA=="}, {"id": "mocha", "name": "Mocha", "kicker": "Chocolate · Hot", "desc": "Our espresso melted into a ganache of 70% dark chocolate, lengthened with steamed milk and topped with whipped cream and warm chocolate sauce.", "notes": ["Dark chocolate", "Cocoa nib", "Fresh cream"], "brew": [["Espresso", "36 g"], ["Chocolate", "25 g"], ["Milk", "62 °C"], ["Glass", "320 ml"]], "sizes": [{"label": "Regular", "vol": "320 ml", "price": 4.9}, {"label": "Large", "vol": "420 ml", "price": 5.5}], "img": "img/mocha-1080.webp", "srcset": "img/mocha-640.webp 640w, img/mocha-1080.webp 1080w", "alt": "Mocha in a glass mug with whipped cream and chocolate sauce running down the sides, next to dark chocolate", "lqip": "data:image/webp;base64,UklGRsAAAABXRUJQVlA4ILQAAAAQBQCdASoYABQAPu1qrFEppaQiqAqpMB2JZgCdM0LBrVra3buiucAA8NbRFn+K3vkAAP7p9Vq77YjVebr9ICyq8hnLnc4FYSHTYprWH23O4XoVh4lDCQGQvsf5NF7TJVx+L1+cltnJnUvfRLv1gATDhq264K7dMFUxgylxpeazHr/yHWr4qghi1maWFF/Ch9oOX0Gf1O0qJmgUJ6M1YuhqvntGxZuuzkg86dsbUZIhHF8pBAA="}, {"id": "americano", "name": "Americano", "kicker": "Espresso · Long", "desc": "Hot water goes in first and the double shot is poured over it, so the crema stays on top. Long and clean, with the sweetness of the espresso intact.", "notes": ["Brown sugar", "Orange zest", "Cedar"], "brew": [["Espresso", "36 g"], ["Water", "200 ml"], ["Temp", "88 °C"], ["Cup", "240 ml"]], "sizes": [{"label": "Regular", "vol": "240 ml", "price": 3.6}, {"label": "Large", "vol": "340 ml", "price": 4.1}], "img": "img/americano-1080.webp", "srcset": "img/americano-640.webp 640w, img/americano-1080.webp 1080w", "alt": "Hot coffee poured from a glass jug into a glass cup on a wooden table", "lqip": "data:image/webp;base64,UklGRsYAAABXRUJQVlA4ILoAAADwBQCdASoYABQAPu1qqFCppaOiqA1RMB2JZACdMoRwKGTh/gHpC3b5ZzCwIujywCygduKZ37YPuAD+6NkgyQGiy44LMlB01j91EANQy/T3Zl64r1LmcoLHFmnGUhZFToB8jzl7n/WWnNHnGVMn+aaN0J7qD7t5LN5t6IqBnLS4PiE8eUDE4UzeKThJDnGTPZZjxLB/cq9bxFLIkKOVA/WmtPggvJxr3ybg1uthNXGeuPBrd/sptQDAAAA="}, {"id": "macchiato", "name": "Macchiato", "kicker": "Espresso · Hot", "desc": "Macchiato means marked. A double shot topped with one spoonful of foamed milk, enough to soften the edges without hiding the coffee.", "notes": ["Caramelised sugar", "Cocoa", "Fresh cream"], "brew": [["Espresso", "36 g"], ["Foam", "1 spoon"], ["Milk", "60 °C"], ["Cup", "90 ml"]], "sizes": [{"label": "Single", "vol": "60 ml", "price": 3.0}, {"label": "Double", "vol": "90 ml", "price": 3.6}], "img": "img/macchiato-1080.webp", "srcset": "img/macchiato-640.webp 640w, img/macchiato-1080.webp 1080w", "alt": "Macchiato with a dot of milk foam in a glossy brown cup, steam rising, beans spilling from a burlap sack", "lqip": "data:image/webp;base64,UklGRroAAABXRUJQVlA4IK4AAADQBACdASoYABUAPu1ur1IppiQiqAgBMB2JQBOmUI9JAllG+aOa3hBy6OpqjH1rAAD+6/4/SEvwV5ImgaQu7ktaJuSl1FhYbs2fxyl3GLETlZ25McCqliX8DR6TL5+DfjC4vA9lQu4ZS5fHzRnr6Xz0z82DEszPlQ15yDQp8ycd0aBbgwhGyE2tFI5l6K6S8aFfMZkDrCEdUxPE6bgqwaKnbarqFxlurhajHw3CAAA="}]}</script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script defer src="js/scene.js"></script>
+<script defer src="js/app.js"></script>
+</body>
+</html>

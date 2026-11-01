@@ -1,0 +1,32 @@
+{
+  "name": "velluto-coffee",
+  "version": "1.0.0",
+  "description": "A cinematic, scroll-driven 3D website for a specialty coffee shop, built with Three.js, GSAP and Lenis.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes serve@14 -l 8080 .",
+    "check": "node scripts/check.mjs"
+  },
+  "keywords": [
+    "coffee",
+    "cafe",
+    "threejs",
+    "webgl",
+    "gsap",
+    "scrolltrigger",
+    "lenis",
+    "landing-page",
+    "creative-coding"
+  ],
+  "author": "Ruqia Enayat",
+  "license": "MIT",
+  "homepage": "https://iamruqia.github.io/velluto-coffee/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iamRuqia/velluto-coffee.git"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
